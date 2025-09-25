@@ -25,6 +25,7 @@ const els = {
   introImageUrl: document.getElementById('intro-image-url'),
   introVideoUrl: document.getElementById('intro-video-url'),
   introSeconds: document.getElementById('intro-seconds'),
+  introFile: document.getElementById('intro-file'),
 };
 
 let clips = [];
@@ -264,3 +265,19 @@ function getIntroAsset() {
   if (img) return { type: 'image', src: img, duration: Math.max(0.5, secs || 2) };
   return null;
 }
+
+els.introFile.addEventListener('change', async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  if (file.type.startsWith('image/')) {
+    els.introVideoUrl.value = '';
+    els.introImageUrl.value = url;
+    els.introSeconds.value = els.introSeconds.value || 2;
+  } else if (file.type.startsWith('video/')) {
+    els.introImageUrl.value = '';
+    els.introVideoUrl.value = url;
+    const durMs = await getVideoDuration(file);
+    if (durMs > 0) els.introSeconds.value = Math.round(durMs / 100) / 10;
+  }
+});
